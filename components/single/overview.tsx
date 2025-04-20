@@ -8,7 +8,8 @@ import {
   TrendingUpIcon,
 } from "lucide-react"
 import { LoadingIcon } from '../global/loading'
-import { combinedMonth } from '@/lib/types'
+import {MonthlyData } from '@/lib/types'
+import { processDataforOverview } from '@/lib/helper_functions'
 
 const MotionCard = motion(Card)
 const slideUp = {
@@ -16,58 +17,11 @@ const slideUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 }
 
-export function processDataforOverview(data: combinedMonth[]) {
-  let thisMonthTotal = 0;
-  let lastMonthTotal = 0;
-  let todayTotal = 0;
-  let yesterdayTotal = 0;
-
-  data.forEach(item => {
-    const thisMonthEntries = Object.entries(item.thisMonth.data);
-    const lastMonthEntries = Object.entries(item.lastMonth.data);
-
-    const thisMonthDays = thisMonthEntries.map(([day]) => parseInt(day));
-    const maxDay = Math.max(...thisMonthDays);
-    const secondMaxDay = Math.max(...thisMonthDays.filter(d => d !== maxDay));
-
-    thisMonthEntries.forEach(([dayStr, value]) => {
-      const day = parseInt(dayStr);
-      thisMonthTotal += value;
-
-      if (day === maxDay) {
-        todayTotal = value;
-      } else if (day === secondMaxDay) {
-        yesterdayTotal = value;
-      }
-    });
-
-    // Fallback: If today is 1st and yesterday is missing, pull from lastMonth
-    if (maxDay === 1 && yesterdayTotal === 0 && lastMonthEntries.length > 0) {
-      const lastMonthDays = lastMonthEntries.map(([day]) => parseInt(day));
-      const lastDay = Math.max(...lastMonthDays);
-      yesterdayTotal = item.lastMonth.data[lastDay.toString()] || 0;
-    }
-
-    // Last Month Total
-    Object.values(item.lastMonth.data).forEach(value => {
-      lastMonthTotal += value;
-    });
-  });
-
-  return {
-    today: todayTotal,
-    yesterday: yesterdayTotal,
-    thisMonth: thisMonthTotal,
-    lastMonth: lastMonthTotal,
-  };
-}
 
 
+function OverView({ thisMonthData, lastMonthData }: { thisMonthData: MonthlyData | null, lastMonthData: MonthlyData | null }) {
 
-
-function OverView({ apiresponse }: { apiresponse: combinedMonth | null }) {
-
-  const processData = processDataforOverview(apiresponse ? [apiresponse] : []);
+  const processData = processDataforOverview(thisMonthData || { month: "", data: {} }, lastMonthData || { month: "", data: {} });
 
   return (
 
@@ -80,7 +34,7 @@ function OverView({ apiresponse }: { apiresponse: combinedMonth | null }) {
               <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{!apiresponse ? <LoadingIcon /> : processData.today}</div>
+              <div className="text-2xl font-bold">{!thisMonthData ? <LoadingIcon /> : processData.today}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 All
               </p>
@@ -95,7 +49,7 @@ function OverView({ apiresponse }: { apiresponse: combinedMonth | null }) {
               <BarChart3Icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{!apiresponse ? <LoadingIcon /> : processData.yesterday}</div>
+              <div className="text-2xl font-bold">{!thisMonthData ? <LoadingIcon /> : processData.yesterday}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 all
               </p>
@@ -106,11 +60,11 @@ function OverView({ apiresponse }: { apiresponse: combinedMonth | null }) {
         <motion.div variants={slideUp} custom={2}>
           <MotionCard whileHover={{ y: -5, transition: { duration: 0.2 } }} variants={slideUp}>
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">This Month</CardTitle>
-              <BarChart3Icon className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">This Month so far</CardTitle>
+              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{!apiresponse ? <LoadingIcon /> : processData.thisMonth}</div>
+              <div className="text-2xl font-bold">{!thisMonthData ? <LoadingIcon /> : processData.thisMonth}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 All App
               </p>
@@ -125,7 +79,7 @@ function OverView({ apiresponse }: { apiresponse: combinedMonth | null }) {
               <BarChart3Icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{!apiresponse ? <LoadingIcon /> : processData.lastMonth}</div>
+              <div className="text-2xl font-bold">{!thisMonthData ? <LoadingIcon /> : processData.lastMonth}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 All App
               </p>

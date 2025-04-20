@@ -6,6 +6,8 @@ import { LineChartIcon } from "lucide-react"
 import { Separator } from "../ui/separator"
 import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart } from "recharts"
 import { LoadingWithText } from "../global/loading"
+import { MonthlyData } from "@/lib/types"
+import { formatMonthlyDataforThirtyDays, DataFormater } from "@/lib/helper_functions"
 
 const MotionCard = motion(Card)
 const slideUp = {
@@ -18,50 +20,12 @@ const getChartColors = () => {
   return {
     primary: theme === "dark" ? "#a78bfa" : "#0369A1",
     secondary: theme === "dark" ? "#4ade80" : "#BAE6F8",
-    tertiary: theme === "dark" ? "#f472b6" : "#ff7eb6",
-    quaternary: theme === "dark" ? "#60a5fa" : "#5b8def",
+    tertiary: theme === "dark" ? "#f472b6" : "#38BDF8",
+    quaternary: theme === "dark" ? "#60a5fa" : "#0C4A6E",
     grid: theme === "dark" ? "#374151" : "#e5e7eb",
   }
 }
 const chartColors = getChartColors()
-const DataFormater = (number: number) => {
-  if (number > 1000000000) {
-    return (number / 1000000000).toString() + "B"
-  } else if (number > 1000000) {
-    return (number / 1000000).toString() + "M"
-  } else if (number > 1000) {
-    return (number / 1000).toString() + "K"
-  } else {
-    return number.toString()
-  }
-}
-
-
-interface combinedMonth {
-  thisMonth: {
-    month: string
-    data: { [day: string]: number }
-  }
-  lastMonth: {
-    month: string
-    data: { [day: string]: number }
-  }
-}
-
-function formatMonthlyData(response: combinedMonth) {
-
-  const result: { day: number; thisMonth: number; lastMonth: number }[] = [];
-
-  for (let day = 1; day <= 31; day++) {
-    result.push({
-      day,
-      thisMonth: response.thisMonth.data[day.toString()] ?? 0,
-      lastMonth: response.lastMonth.data[day.toString()] ?? 0
-    });
-  }
-
-  return result;
-}
 
 // Custom tooltip that prevents duplicate data keys
 //@ts-ignore
@@ -101,10 +65,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null
 }
 
-function Thirtydays({combinedData}: {combinedData: combinedMonth | null}) {
-  
- 
-
+function Thirtydays({ thisMonthData, lastMonthData }: { thisMonthData: MonthlyData | null, lastMonthData: MonthlyData | null }) {
   
   return (
     <>
@@ -121,12 +82,12 @@ function Thirtydays({combinedData}: {combinedData: combinedMonth | null}) {
             <CardDescription>Comparison of tracking volume between time periods (add app filter)</CardDescription>
             <Separator className="mt-4" />
           </CardHeader>
-          {!combinedData && (<div className="h-[400px] flex items-center justify-center"><LoadingWithText/></div>)}
-          {combinedData && (
+          {!thisMonthData && (<div className="h-[400px] flex items-center justify-center"><LoadingWithText/></div>)}
+          {thisMonthData && lastMonthData && (
            <CardContent className="p-0 md:p-4">
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={formatMonthlyData(combinedData)} margin={{ top: 20, right: 30, left: 20, bottom: 70 }}>
+                <ComposedChart data={formatMonthlyDataforThirtyDays(thisMonthData, lastMonthData)} margin={{ top: 20, right: 30, left: 20, bottom: 70 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
                   <XAxis dataKey="day" angle={-45} textAnchor="end" height={70} tick={{ fontSize: 12 }} />
                   <YAxis tickFormatter={DataFormater} />
@@ -150,7 +111,7 @@ function Thirtydays({combinedData}: {combinedData: combinedMonth | null}) {
                     type="monotone"
                     dataKey="thisMonth"
                     name="Current Trend"
-                    stroke={chartColors.primary}
+                    stroke={chartColors.quaternary}
                     strokeWidth={2}
                     dot={{ r: 3 }}
                     animationDuration={2000}
@@ -159,7 +120,7 @@ function Thirtydays({combinedData}: {combinedData: combinedMonth | null}) {
                     type="monotone"
                     dataKey="lastMonth"
                     name="Previous Trend"
-                    stroke={chartColors.secondary}
+                    stroke={chartColors.tertiary}
                     strokeWidth={2}
                     dot={{ r: 3 }}
                     animationDuration={2000}

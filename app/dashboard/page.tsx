@@ -6,26 +6,53 @@ import {SidebarInset,SidebarProvider,SidebarTrigger} from "@/components/ui/sideb
 import OverView from "@/components/single/overview"
 import Thirtydays from "@/components/single/thirtydays"
 import { useEffect, useState } from "react"
-import { combinedMonth } from "@/lib/types"
+import { MonthlyData } from "@/lib/types"
 import { fetchApiResponse } from "@/lib/functions"
+
 
 
 
 export default function Page() {
 
-  const [apiresponse, setApiresponse] = useState<combinedMonth | null>(null)
+  const [thisMonthData, setThisMonthData] = useState<MonthlyData | null>(null);
+  const [lastMonthData, setLastMonthData] = useState<MonthlyData | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetchApiResponse("/combined-months/")
-        setApiresponse(response)
-      } catch (error) {
-        console.error("Error fetching data:", error)
-      }
+    const now = new Date();
+    const thisMonth = now.getMonth(); // 0-11
+    const lastMonth = (thisMonth - 1 + 12) % 12;
+
+    // Handle THIS MONTH
+    const thisMonthCachedData = localStorage.getItem('thisMonthCachedData');
+    const thisMonthCachedTime = Number(localStorage.getItem('thisMonthCatchedTime'));
+    const tenMinutes = 10 * 60 * 1000;
+
+    if (thisMonthCachedData && (Date.now() - thisMonthCachedTime) < tenMinutes) {
+      setThisMonthData(JSON.parse(thisMonthCachedData));
+    } else {
+      fetchApiResponse('/this-month/')
+        .then(data => {
+          setThisMonthData(data);
+          localStorage.setItem('thisMonthCachedData', JSON.stringify(data));
+          localStorage.setItem('thisMonthCatchedTime', Date.now().toString());
+        });
     }
-    fetchData()
-  }, [])
+
+    // Handle LAST MONTH
+    const lastMonthCachedData = localStorage.getItem('lastMonthCachedData');
+    const lastMonthCachedTime = Number(localStorage.getItem('lastMonthCachedTime'));
+
+    if (lastMonthCachedData && lastMonthCachedTime === lastMonth) {
+      setLastMonthData(JSON.parse(lastMonthCachedData));
+    } else {
+      fetchApiResponse('/last-month/')
+        .then(data => {
+          setLastMonthData(data);
+          localStorage.setItem('lastMonthCachedData', JSON.stringify(data));
+          localStorage.setItem('lastMonthCachedTime', lastMonth.toString());
+        });
+    }
+  }, []);
   
   return (
     <SidebarProvider>
@@ -55,8 +82,8 @@ export default function Page() {
             <div className="aspect-video rounded-xl bg-muted/50" />
             <div className="aspect-video rounded-xl bg-muted/50" />
           </div> */}
-          <OverView apiresponse = {apiresponse} />
-          <Thirtydays combinedData={apiresponse}/>
+          <OverView thisMonthData={thisMonthData} lastMonthData={lastMonthData} />
+          <Thirtydays thisMonthData={thisMonthData} lastMonthData={lastMonthData} />
           <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
         </div>
       </SidebarInset>

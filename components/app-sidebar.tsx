@@ -15,11 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useEffect, useState } from "react"
 import { fetchApiResponse } from "@/lib/functions"
-
-
-
-
-
+import { processAppNames } from "@/lib/helper_functions"
 // This is sample data.
 const data = {
   navMain: [
@@ -85,61 +81,57 @@ const data = {
   ],
 }
 
-async function processAppNames(data: string[]) {
-  return data.map((item: string) => {
-    const parts = item.split('.');
-    const title = parts.length === 3 ? parts[2] : item;
-    return {
-      title: title.toLowerCase(),
-      url: "#"
-    };
-  });
-}
+
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
-   const [apiresponse, setApiresponse] = useState<{ title: string; url: string }[] | null>(null)
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const response = await fetchApiResponse('/all-apps/');
-          const processedData = await processAppNames(response);
-          setApiresponse(processedData);
-        } catch (error) {
-          console.error("Error fetching data:", error)
-        }
-      }
-      fetchData()
-    }, [])
+  const [apiresponse, setApiresponse] = useState<{ title: string; url: string }[] | null>(null)
+
+  useEffect(() => {
+
+    const allAppsCacheData = localStorage.getItem('allAppsCacheData');
+    const allAppsCacheTime = Number(localStorage.getItem('allAppsCacheTime'));
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    if (allAppsCacheData && (Date.now() - allAppsCacheTime) < oneDay) {
+      setApiresponse(processAppNames(JSON.parse(allAppsCacheData)));
+    } else {
+      fetchApiResponse('/all-apps/')
+        .then(async data => {
+          setApiresponse(processAppNames(data));
+          localStorage.setItem('allAppsCacheData', JSON.stringify(data));
+          localStorage.setItem('allAppsCacheTime', Date.now().toString());
+        });
+    }
+  }, [])
 
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        
+
         <SearchForm />
       </SidebarHeader>
       <SidebarContent>
         {/* static group */}
         <SidebarGroup>
-            <SidebarGroupLabel>Filter Apps</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
+          <SidebarGroupLabel>Filter Apps</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
               <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <a href='#'>All Apps</a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                {apiresponse && apiresponse.map((item, index) => (
-                  <SidebarMenuItem key={index}>
-                    <SidebarMenuButton asChild>
-                      <a href='#'>{item.title}</a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+                <SidebarMenuButton asChild>
+                  <a href='#'>All Apps</a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              {apiresponse && apiresponse.map((item, index) => (
+                <SidebarMenuItem key={index}>
+                  <SidebarMenuButton asChild>
+                    <a href='#'>{item.title}</a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
         {/* We create a SidebarGroup for each parent. */}
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
