@@ -53,17 +53,18 @@ function AppsTrackingCount() {
 
     useEffect(() => {
 
-        const today = new Date().getDay();
-
+        const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' }));
+        const today: string = now.toISOString().slice(0, 10); // e.g., "2025-04"
+        
         const dataKey = 'trackingCountData';
         const timeKey = 'trackingCountTime';
         const cachedData = localStorage.getItem(dataKey);
-        const cachedTime = Number(localStorage.getItem(timeKey));
+        const cachedTime = localStorage.getItem(timeKey);
 
         if (cachedData && today === cachedTime) {
             setProcessedData(JSON.parse(cachedData));
         } else {
-            fetchApiResponse('/tracking-count/?startDate=2025-04-18/')
+            fetchApiResponse(`/tracking-count/?startDate=${today}`)
                 .then(data => {
                     setProcessedData(processTrackingCount(data));
                     localStorage.setItem(dataKey, JSON.stringify(processTrackingCount(data)));
