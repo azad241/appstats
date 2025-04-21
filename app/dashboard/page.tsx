@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator"
 import {SidebarInset,SidebarProvider,SidebarTrigger} from "@/components/ui/sidebar"
 import OverView from "@/components/single/overview"
 import Thirtydays from "@/components/single/thirtydays"
+import AppsTrackingCount from "@/components/single/tracking-count"
 import { useEffect, useState } from "react"
 import { MonthlyData } from "@/lib/types"
 import { fetchApiResponse } from "@/lib/functions"
@@ -83,6 +84,7 @@ export default function Page() {
             <div className="aspect-video rounded-xl bg-muted/50" />
           </div> */}
           <OverView thisMonthData={thisMonthData} lastMonthData={lastMonthData} />
+          <AppsTrackingCount />
           <Thirtydays thisMonthData={thisMonthData} lastMonthData={lastMonthData} />
           <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
         </div>

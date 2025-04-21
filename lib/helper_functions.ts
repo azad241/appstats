@@ -73,6 +73,7 @@ export const DataFormater = (number: number) => {
 
 export function processAppNames(data: string[]) {
   return data.map((item: string) => {
+    item = item.toLowerCase();
     const parts = item.split('.');
     const title = parts.length === 3 ? parts[2] : item;
     return {
@@ -81,3 +82,44 @@ export function processAppNames(data: string[]) {
     };
   });
 }
+
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+type AppColorMap = Record<string, string>;
+
+export const getAppColors = (): AppColorMap => {
+  const colors: AppColorMap = {
+    shopee: '#EE4E2E',
+    dx: '#1F8BCE',
+    fastway: '#012F80',
+    yunexpress: '#0F8C88',
+    ontrac: '#BD242D',
+    uniuni: '#F49743',
+    x4px: '#0056F5',
+    speedx: '#045CA1',
+  };
+
+  return new Proxy(colors, {
+    get(target, prop: string) {
+      // if property exists, return it
+      console.log(prop)
+      if (prop in target) {
+        return target[prop];
+      }
+
+      // else generate a random color and assign it
+      const newColor = getRandomColor();
+      target[prop] = newColor;
+      return newColor;
+    },
+  }) as AppColorMap;
+};
+
+
