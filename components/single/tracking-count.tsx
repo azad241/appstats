@@ -9,7 +9,7 @@ import { fetchApiResponse } from "@/lib/functions"
 import { LoadingWithText } from "../global/loading"
 import {ProcessedTrackingCount, TrackingCount } from "@/lib/types"
 import { getAppColors } from "@/lib/helper_functions"
-
+import { DataFormater } from "@/lib/helper_functions"
 export const appColors = getAppColors();
 
 const MotionCard = motion(Card)
@@ -61,7 +61,7 @@ function AppsTrackingCount() {
         const cachedData = localStorage.getItem(dataKey);
         const cachedTime = localStorage.getItem(timeKey);
 
-        if (cachedData && today === cachedTime) {
+        if (cachedData && today !== cachedTime) {
             setProcessedData(JSON.parse(cachedData));
         } else {
             fetchApiResponse(`/tracking-count/?startDate=${today}`)
@@ -95,7 +95,7 @@ function AppsTrackingCount() {
                                 <BarChart data={processedData} margin={{ top: 20, right: 30, left: 20, bottom: 70 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
                                     <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} tick={{ fontSize: 12 }} />
-                                    <YAxis />
+                                    <YAxis tickFormatter={DataFormater} />
                                     <Tooltip
                                         formatter={(value, name, props) => [value, props.payload.fullName]}
                                         labelFormatter={(label) => `App: ${label}`}
