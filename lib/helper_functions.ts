@@ -109,7 +109,6 @@ export const getAppColors = (): AppColorMap => {
   return new Proxy(colors, {
     get(target, prop: string) {
       // if property exists, return it
-      console.log(prop)
       if (prop in target) {
         return target[prop];
       }

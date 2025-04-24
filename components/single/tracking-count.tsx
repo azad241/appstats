@@ -59,16 +59,15 @@ function AppsTrackingCount() {
         const dataKey = 'trackingCountData';
         const timeKey = 'trackingCountTime';
         const cachedData = localStorage.getItem(dataKey);
-        const cachedTime = localStorage.getItem(timeKey);
-
-        if (cachedData && today !== cachedTime) {
+        const cachedTime = Number(localStorage.getItem(timeKey));
+        if (cachedData && (Date.now() - cachedTime) < 10*60*1000) {
             setProcessedData(JSON.parse(cachedData));
         } else {
             fetchApiResponse(`/tracking-count/?startDate=${today}`)
                 .then(data => {
                     setProcessedData(processTrackingCount(data));
                     localStorage.setItem(dataKey, JSON.stringify(processTrackingCount(data)));
-                    localStorage.setItem(timeKey, today.toString());
+                    localStorage.setItem(timeKey, Date.now().toString());
                 });
         }
     }, [])
