@@ -21,7 +21,7 @@ export default function Page() {
   useEffect(() => {
     const now = new Date();
     const thisMonth = now.getMonth()+1; // 0-11: converted to 1-12
-    const lastMonth = (thisMonth - 1 + 12) % 12; //converted to 1-12 based
+    const lastMonth = ((thisMonth - 2 + 12) % 12) + 1; //converted to 1-12 based
 
     // Handle THIS MONTH
     const thisMonthCachedData = localStorage.getItem('thisMonthCachedData');
