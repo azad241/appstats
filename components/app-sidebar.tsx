@@ -91,9 +91,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const allAppsCacheData = localStorage.getItem('allAppsCacheData');
     const allAppsCacheTime = Number(localStorage.getItem('allAppsCacheTime'));
-    const oneDay = 24 * 60 * 60 * 1000;
+    const tenDays = 10 * 24 * 60 * 60 * 1000;
 
-    if (allAppsCacheData && (Date.now() - allAppsCacheTime) < oneDay) {
+    if (allAppsCacheData && (Date.now() - allAppsCacheTime) < tenDays) {
       setApiresponse(processAppNames(JSON.parse(allAppsCacheData)));
     } else {
       fetchApiResponse('/all-apps/')

@@ -54,13 +54,13 @@ function AppsTrackingCount() {
     useEffect(() => {
 
         const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' }));
-        const today: string = now.toISOString().slice(0, 10); // e.g., "2025-04"
+        const today: string = now.toISOString().slice(0, 10); // e.g., "2025-04-20"
         
         const dataKey = 'trackingCountData';
         const timeKey = 'trackingCountTime';
         const cachedData = localStorage.getItem(dataKey);
         const cachedTime = Number(localStorage.getItem(timeKey));
-        if (cachedData && (Date.now() - cachedTime) < 10*60*1000) {
+        if (cachedData && (now.getTime() - cachedTime) < 10*60*1000) {
             setProcessedData(JSON.parse(cachedData));
         } else {
             fetchApiResponse(`/tracking-count/?startDate=${today}`)
@@ -71,6 +71,7 @@ function AppsTrackingCount() {
                 });
         }
     }, [])
+
     return (
         <>
             <motion.div className="col-span-full xl:col-span-2" variants={slideUp} custom={4}>
