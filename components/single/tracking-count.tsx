@@ -54,7 +54,7 @@ function AppsTrackingCount() {
     useEffect(() => {
 
         const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' }));
-        const today: string = now.toISOString().slice(0, 10); // e.g., "2025-04-20"
+        const today = now.toLocaleString('sv-SE', { timeZone: 'Asia/Dhaka' }).split(' ')[0]; //now.toISOString() always returns UTC
         
         const dataKey = 'trackingCountData';
         const timeKey = 'trackingCountTime';
